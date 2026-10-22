@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1
 FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -18,5 +19,7 @@ COPY . .
 
 RUN make clean && make check
 
-ENTRYPOINT ["sh", "-c", "exec /app/build/$(jq -r .name config.json) \"$@\"", "--"]
 
+RUN APP_NAME=$(jq -r .name config.json) && cp "build/${APP_NAME}" build/wordcount
+
+ENTRYPOINT ["/app/build/wordcount"]
