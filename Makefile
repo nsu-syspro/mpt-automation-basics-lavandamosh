@@ -11,9 +11,7 @@ OUT  := build/$(APP)
 
 TEST_SRCS := $(wildcard test/*.txt)
 
-TEST_PASS := $(patsubst test/%.txt,build/%.passed,$(TEST_SRCS))
-
-.PHONY: all check clean
+.PHONY: all check clean execute_tests
 
 all: $(OUT)
 
@@ -21,12 +19,14 @@ $(OUT): $(MAIN) $(CONFIG)
 	@mkdir -p build
 	$(C_COMPILER) $(DEFINES) $(COMMON_FLAGS) -o $@ $(MAIN)
 
-check: $(OUT) $(TEST_PASS)
 
-build/%.passed: test/%.txt test/%.expected $(OUT)
-	@./$(OUT) $< | diff - test/$*.expected
-	@touch $@
+check: $(OUT)
+	@$(MAKE) -s execute_tests
+
+execute_tests: $(OUT)
+	@$(foreach f,$(TEST_SRCS),./$(OUT) "$(f)" | diff - "$(f:.txt=.expected)" || exit 1;)
 
 clean:
 	rm -rf build
+
 
