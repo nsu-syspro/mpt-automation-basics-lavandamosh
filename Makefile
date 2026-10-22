@@ -9,21 +9,22 @@ DEFINES      := -DNAME='"$(APP)"' -DVERSION='"$(VER)"'
 MAIN := src/wordcount.c
 OUT  := build/$(APP)
 
-TEST_SRCS := $(wildcard test/*.txt)
-
+TEST_SRCS    := $(wildcard test/*.txt)
 TEST_TARGETS := $(TEST_SRCS:.txt=.test)
 
 .PHONY: all check clean $(TEST_TARGETS)
 
 all: $(OUT)
 
-$(OUT): $(MAIN) $(CONFIG) | build
+$(OUT): $(MAIN) $(CONFIG)
+	@mkdir -p build
 	$(C_COMPILER) $(DEFINES) $(COMMON_FLAGS) -o $@ $(MAIN)
 
-build:
-	@mkdir -p build
+check: $(OUT)
+	@$(MAKE) -s execute_tests
 
-check: $(TEST_TARGETS)
+.PHONY: execute_tests
+execute_tests: $(TEST_TARGETS)
 
 test/%.test: test/%.txt $(OUT)
 	@./$(OUT) $< | diff - $*.expected
