@@ -9,24 +9,23 @@ DEFINES      := -DNAME='"$(APP)"' -DVERSION='"$(VER)"'
 MAIN := src/wordcount.c
 OUT  := build/$(APP)
 
-TEST_SRCS := $(wildcard test/*.txt)
+TXT_TEST_SRCS := $(wildcard test/*.txt)
+TESTS := $(patsubst test/%.txt,test/%.test,$(TXT_SOURCES))
 
-.PHONY: all check clean execute_tests
+.PHONY: all check clean $(TESTS)
 
 all: $(OUT)
 
 $(OUT): $(MAIN) $(CONFIG)
-	@mkdir -p build
-	$(C_COMPILER) $(DEFINES) $(COMMON_FLAGS) -o $@ $(MAIN)
+  @mkdir -p build
+  $(C_COMPILER) $(DEFINES) $(COMMON_FLAGS) -o $@ $(MAIN)
 
 
-check: $(OUT)
-	@$(MAKE) -s execute_tests
+check: $(TESTS)
 
-execute_tests: $(OUT)
-	@$(foreach f,$(TEST_SRCS),./$(OUT) "$(f)" | diff - "$(f:.txt=.expected)" || exit 1;)
-
+$(TESTS): test/%.test: test/%.txt test/%.expected $(BIN)
+  @"$(BIN)" "$<" | diff -u "test/$*.expected" -
+  
 clean:
-	rm -rf build
-
+  rm -rf build
 
