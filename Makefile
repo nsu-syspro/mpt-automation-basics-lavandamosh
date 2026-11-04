@@ -17,15 +17,14 @@ TESTS := $(patsubst test/%.txt,test/%.test,$(TXT_SOURCES))
 all: $(OUT)
 
 $(OUT): $(MAIN) $(CONFIG)
-  @mkdir -p build
-  $(C_COMPILER) $(DEFINES) $(COMMON_FLAGS) -o $@ $(MAIN)
+	@mkdir -p build
+	$(C_COMPILER) $(DEFINES) $(COMMON_FLAGS) -o $@ $(MAIN)
 
 
 check: $(TESTS)
 
 $(TESTS): test/%.test: test/%.txt test/%.expected $(BIN)
-  @"$(BIN)" "$<" | diff -u "test/$*.expected" -
-  
+	@"$(BIN)" "$<" | diff -u "test/$*.expected" -
+	
 clean:
-  rm -rf build
-
+	rm -rf build
